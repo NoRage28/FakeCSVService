@@ -5,7 +5,7 @@ from schema.choices import (
     SCHEMA_COLUMN_TYPE,
     SCHEMA_STRING_CHARACTER,
 )
-from schema.models import Schema
+from schema.models import Schema, Dataset
 
 
 class SchemaColumnSerializer(serializers.Serializer):
@@ -44,3 +44,17 @@ class SchemaSerializer(serializers.ModelSerializer):
     class Meta:
         model = Schema
         fields = "__all__"
+
+
+class DataSetSerializer(serializers.ModelSerializer):
+    user = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    rows = serializers.IntegerField(min_value=1, required=False)
+
+    class Meta:
+        model = Dataset
+        fields = "__all__"
+
+    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        if not data.get("rows"):
+            raise serializers.ValidationError("Value 'rows' required.")
+        return data
