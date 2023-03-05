@@ -1,5 +1,6 @@
 from rest_framework import viewsets, views, status
 from rest_framework.response import Response
+from rest_framework import permissions
 from schema.models import Schema, Dataset
 from schema.serializers import SchemaSerializer, DataSetSerializer
 from rest_framework.decorators import action
@@ -11,6 +12,7 @@ from schema.tasks import start_create_dataset_task
 class SchemaViewSet(viewsets.ModelViewSet):
     queryset = Schema.objects.all()
     serializer_class = SchemaSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=True, methods=["post"], url_name="create_dataset")
     def create_dataset(self, request, pk):
@@ -25,9 +27,10 @@ class SchemaViewSet(viewsets.ModelViewSet):
         )
 
 
-class DataSetViewSet(viewsets.ReadOnlyModelViewSet):
+class DataSetViewSet(viewsets.ModelViewSet):
     queryset = Dataset.objects.all()
     serializer_class = DataSetSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=True, methods=["get"], url_name="download_dataset")
     def download(self, request, pk):
