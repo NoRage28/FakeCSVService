@@ -1,8 +1,8 @@
 import csv
 import os
-from datetime import datetime
 
 from schema.models import Schema, Dataset
+from schema.utils import create_file_name
 
 from django.core.files import File
 from typing import Dict, List, Optional, Any
@@ -13,11 +13,12 @@ class DatasetCreator:
     def __init__(self):
         self.fake_data_creator = FakeDataGeneratorService()
         self.file_writer = CSVFileWriter()
+        self.file_name = create_file_name()
 
     def create_dataset(self, user_id: str, data: Dict, schema_pk: str):
         self._create_file_with_fake_data(data=data, schema_pk=schema_pk)
         self._save_dataset_file_to_db(user_id=user_id, data=data)
-        self._remove_file_from_disk(data=data)
+        self._remove_file_from_disk()
 
     def _create_file_with_fake_data(self, data: Dict, schema_pk: str):
         schema = Schema.objects.get(id=schema_pk)
@@ -25,20 +26,20 @@ class DatasetCreator:
             schema_columns=schema.columns, number_of_rows=data.get("rows")
         )
         self.file_writer.write_data_to_file(
-            file_name=data.get("name"),
+            file_name=self.file_name,
             data=fake_data,
             delimiter=schema.column_separator,
             quotechar=schema.string_character,
         )
 
     def _save_dataset_file_to_db(self, user_id: str, data: Dict):
-        with open(f'{data.get("name")}.csv', "r") as csv_file:
+        with open(f'{self.file_name}.csv', "r") as csv_file:
             Dataset.objects.create(
-                user_id=user_id, name=data.get("name"), file=File(csv_file)
+                user_id=user_id, name=data.get('name'), file=File(csv_file)
             )
 
-    def _remove_file_from_disk(self, data: Dict):
-        os.remove(f'{data.get("name")}.csv')
+    def _remove_file_from_disk(self):
+        os.remove(f'{self.file_name}.csv')
 
 
 class CSVFileWriter:
@@ -96,9 +97,4 @@ class FakeDataGeneratorService:
             return func()
 
 
-def start_create_dataset_task(user_id: str, data: Dict, schema_pk: str):
-    from schema.tasks import create_dataset_task
 
-    cache_task_key = str(datetime.utcnow().timestamp())
-    create_dataset_task.delay(cache_task_key, user_id, data, schema_pk)
-    return cache_task_key

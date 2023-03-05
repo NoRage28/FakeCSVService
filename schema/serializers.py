@@ -49,6 +49,7 @@ class SchemaSerializer(serializers.ModelSerializer):
 class DataSetSerializer(serializers.ModelSerializer):
     user = serializers.HiddenField(default=serializers.CurrentUserDefault())
     rows = serializers.IntegerField(min_value=1, required=False)
+    file = serializers.FileField(max_length=None, use_url=True, allow_null=True, required=False)
 
     class Meta:
         model = Dataset
