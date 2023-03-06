@@ -10,6 +10,7 @@ This is a short tutorial that will help you familiarize yourself with all the fu
 * [Actions with the datasets](#actions-with-the-datasets)
 * [Checking the status of the dataset](#checking-the-status-of-the-dataset)
 * [Download Dataset](#download-dataset)
+* [Possible Improvements](#possible-improvements)
 
 
 ## Authorization
@@ -109,3 +110,8 @@ To do this, you need to execute the following command:
 `curl http://localhost:8000/api/dataset/<dataset_id>/download/ -H "Content-Type:application/json" -H "Authorization: Bearer <access token>"`
 
 After executing the command, you will receive a link to download your dataset.
+
+
+## Possible improvements
+
+### Test coverage, Docker Creation
